@@ -53,11 +53,4 @@ Pod::Spec.new do |s|
     inlineCamera.source_files = "Sources/Extensions/DKImageExtensionInlineCamera.swift"
   end
 
-  s.subspec 'PhotoEditor' do |photoEditor|
-    photoEditor.dependency 'DKImagePickerController/Core'
-    photoEditor.dependency 'CLImageEditor', '0.2.0'
-
-    photoEditor.source_files = "Sources/Extensions/DKImageExtensionPhotoEditor.swift"
-  end
-
 end
