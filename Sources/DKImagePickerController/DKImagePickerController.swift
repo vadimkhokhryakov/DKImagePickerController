@@ -309,7 +309,7 @@ open class DKImagePickerController: UINavigationController, DKImageBaseManagerOb
             exportBlock()
         } else {
             exportBlock()
-            self.presentingViewController?.dismiss(animated: true, completion: nil)
+            //self.presentingViewController?.dismiss(animated: true, completion: nil)
         }
     }
     
