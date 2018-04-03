@@ -51,7 +51,7 @@ class DKAssetGroupDetailImageCell: DKAssetGroupDetailBaseCell {
             super.init(frame: frame)
             
             self.addSubview(self.checkImageView)
-            self.addSubview(self.checkLabel)
+            //self.addSubview(self.checkLabel)
         }
         
         required init?(coder aDecoder: NSCoder) {
@@ -90,7 +90,13 @@ class DKAssetGroupDetailImageCell: DKAssetGroupDetailBaseCell {
     
     override var isSelected: Bool {
         didSet {
-            self.checkView.isHidden = !super.isSelected
+            if super.isSelected {
+                self.thumbnailImageView.alpha = 0.5
+                self.checkView.isHidden = false
+            } else {
+                self.thumbnailImageView.alpha = 1
+                self.checkView.isHidden = true
+            }
         }
     }
     

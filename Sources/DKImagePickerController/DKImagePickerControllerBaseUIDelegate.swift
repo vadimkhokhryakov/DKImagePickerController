@@ -93,10 +93,13 @@ open class DKImagePickerControllerBaseUIDelegate: NSObject, DKImagePickerControl
             
             let formattedSelectableCount = formatter.string(from: NSNumber(value: self.imagePickerController.selectedAssetIdentifiers.count))
             
-            button.setTitle(String(format: DKImagePickerControllerResource.localizedStringWithKey("picker.select.title"),
-                                   formattedSelectableCount ?? self.imagePickerController.selectedAssetIdentifiers.count), for: .normal)
+            /*button.setTitle(String(format: DKImagePickerControllerResource.localizedStringWithKey("picker.select.title"),
+                                   formattedSelectableCount ?? self.imagePickerController.selectedAssetIdentifiers.count), for: .normal)*/
+        button.setTitle(DKImagePickerControllerResource.localizedStringWithKey("picker.select.done.title"), for: .normal)
+            button.isHidden = false
         } else {
             button.setTitle(DKImagePickerControllerResource.localizedStringWithKey("picker.select.done.title"), for: .normal)
+                button.isHidden = true
         }
         
         button.sizeToFit()
