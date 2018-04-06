@@ -20,6 +20,7 @@ open class DKImageExtensionCamera: DKImageBaseExtension {
             , let didCancel = extraInfo["didCancel"] as? (() -> Void) else { return }
         
         let camera = DKCamera()
+        camera.defaultCaptureDevice = .front
         camera.didFinishCapturingImage = didFinishCapturingImage
         camera.didCancel = didCancel
         
