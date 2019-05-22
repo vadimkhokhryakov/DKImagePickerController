@@ -19,9 +19,12 @@ open class DKImageExtensionCamera: DKImageBaseExtension {
         guard let didFinishCapturingImage = extraInfo["didFinishCapturingImage"] as? ((UIImage, [AnyHashable : Any]?) -> Void)
             , let didCancel = extraInfo["didCancel"] as? (() -> Void) else { return }
         
+        let containsGPSInMetadata = extraInfo["containsGPSInMetadata"] as? Bool ?? false
+        
         let camera = DKCamera()
         camera.defaultCaptureDevice = .front
         camera.didFinishCapturingImage = didFinishCapturingImage
+        camera.containsGPSInMetadata = containsGPSInMetadata
         camera.didCancel = didCancel
         
         self.checkCameraPermission(camera)
@@ -36,7 +39,8 @@ open class DKImageExtensionCamera: DKImageBaseExtension {
     open func checkCameraPermission(_ camera: DKCamera) {
         func cameraDenied() {
             DispatchQueue.main.async {
-                let permissionView = DKPermissionView.permissionView(.camera)
+                let permissionView = DKPermissionView.permissionView(.camera,
+                                                                     withColors: self.context.imagePickerController.permissionViewColors)
                 camera.cameraOverlayView = permissionView
             }
         }

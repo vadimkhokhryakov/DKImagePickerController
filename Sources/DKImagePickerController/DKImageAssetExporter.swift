@@ -17,7 +17,7 @@ public class DKImageAssetDiskPurger {
     private var directories = Set<URL>()
     
     private init() {
-        NotificationCenter.default.addObserver(self, selector: #selector(removeFiles), name: .UIApplicationWillTerminate, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(removeFiles), name: UIApplication.willTerminateNotification, object: nil)
     }
     
     deinit {
@@ -127,7 +127,7 @@ public class DKImageAssetExporterConfiguration: NSObject, NSCopying {
 @objc
 open class DKImageAssetExporter: DKImageBaseManager {
     
-    static public let sharedInstance = DKImageAssetExporter(configuration: DKImageAssetExporterConfiguration())
+    @objc static public let sharedInstance = DKImageAssetExporter(configuration: DKImageAssetExporterConfiguration())
 
     private let configuration: DKImageAssetExporterConfiguration
     
@@ -144,7 +144,7 @@ open class DKImageAssetExporter: DKImageBaseManager {
     private weak var currentAVExportSession: AVAssetExportSession?
     private var currentAssetInRequesting: DKAsset?
     
-    public init(configuration: DKImageAssetExporterConfiguration) {
+    @objc public init(configuration: DKImageAssetExporterConfiguration) {
         self.configuration = configuration.copy() as! DKImageAssetExporterConfiguration
         
         super.init()
@@ -275,7 +275,7 @@ open class DKImageAssetExporter: DKImageBaseManager {
         return requestID
     }
     
-    public func cancel(requestID: DKImageAssetExportRequestID) {
+    @objc public func cancel(requestID: DKImageAssetExportRequestID) {
         if let operation = self.operations[requestID] {
             if operation.isExecuting {
                 self.currentAVExportSession?.cancelExport()
@@ -285,7 +285,7 @@ open class DKImageAssetExporter: DKImageBaseManager {
         }
     }
     
-    public func cancelAll() {
+    @objc public func cancelAll() {
         self.operations.removeAll()
         self.exportQueue.cancelAllOperations()
         self.currentAssetInRequesting?.cancelRequests()
@@ -313,7 +313,7 @@ open class DKImageAssetExporter: DKImageBaseManager {
     
     private func isHEIC(with imageData: Data) -> Bool {
         if imageData.count >= 12, let firstByte = imageData.first, firstByte == 0 {
-            let subdata = imageData.subdata(in: Range(4..<12))
+            let subdata = imageData.subdata(in: 4..<12)
             let str = String(data: subdata, encoding: .ascii)
             return str == "ftypheic" || str == "ftypheix" || str == "ftyphevc" || str == "ftyphevx"
         } else {
@@ -325,7 +325,7 @@ open class DKImageAssetExporter: DKImageBaseManager {
         if #available(iOS 10.0, *), let ciImage = CIImage(data: imageData), let colorSpace = ciImage.colorSpace {
             return CIContext().jpegRepresentation(of: ciImage, colorSpace: colorSpace, options:[:])
         } else if let image = UIImage(data: imageData) {
-            return UIImageJPEGRepresentation(image, 0.9)
+            return image.jpegData(compressionQuality: 0.9)
         } else {
             return nil
         }
@@ -425,7 +425,13 @@ open class DKImageAssetExporter: DKImageBaseManager {
                             }
                             
                             if  self.configuration.imageExportPreset == .compatible && self.isHEIC(with: imageData) {
-                                imageData = self.imageToJPEG(with: imageData) ?? imageData
+                                if let jpgData = self.imageToJPEG(with: imageData) {
+                                    imageData = jpgData
+                                    
+                                    if asset.fileName!.uppercased().hasSuffix(".HEIC") {
+                                        asset.fileName = asset.fileName!.dropLast(4) + "jpg"
+                                    }
+                                }
                             }
                             
                             do {
@@ -456,7 +462,7 @@ open class DKImageAssetExporter: DKImageBaseManager {
                 }
                 
                 do {
-                    try write(data: UIImageJPEGRepresentation(asset.image!, 0.9)!, to: asset.localTemporaryPath!)
+                    try write(data: asset.image!.jpegData(compressionQuality: 0.9)!, to: asset.localTemporaryPath!)
                     completion(nil)
                 } catch {
                     completion(error)
